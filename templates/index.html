@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Friendly Robo</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+         display:flex;align-items:center;justify-content:center;min-height:100vh;
+         background:#0f172a;color:#e2e8f0;margin:0}
+    .card{background:#111827;border-radius:20px;padding:28px 32px;box-shadow:0 10px 30px rgba(0,0,0,.35);
+          text-align:center;max-width:520px}
+    .msg{font-size:1.4rem;margin-top:16px}
+    svg{width:160px;height:160px}
+  </style>
+</head>
+<body>
+<div class="card">
+  <svg viewBox="0 0 200 200" aria-label="friendly robot">
+    <rect x="40" y="40" width="120" height="90" rx="16" fill="#38bdf8"/>
+    <line x1="100" y1="30" x2="100" y2="40" stroke="#e2e8f0" stroke-width="4"/>
+    <circle cx="100" cy="24" r="6" fill="#f59e0b"/>
+    <circle cx="70" cy="80" r="10" fill="#111827"/>
+    <circle cx="130" cy="80" r="10" fill="#111827"/>
+    <path d="M70 105 Q100 125 130 105" stroke="#111827" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <rect x="55" y="130" width="90" height="40" rx="10" fill="#22c55e"/>
+  </svg>
+  <div class="msg">{{ message }}</div>
+</div>
+</body>
+</html>

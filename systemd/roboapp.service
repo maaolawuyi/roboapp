@@ -1,0 +1,13 @@
+[Unit]
+Description=Robo Flask App (Gunicorn)
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/var/www/roboapp
+ExecStart=/bin/bash /var/www/roboapp/scripts/gunicorn_start.sh
+Restart=always
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
