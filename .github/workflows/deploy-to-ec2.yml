@@ -13,7 +13,7 @@ jobs:
 
       - name: Create archive
         run: |
-          tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' . || true
+          tar --ignore-failed-read -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' .
 
       - name: Copy archive to EC2
         uses: appleboy/scp-action@v1
