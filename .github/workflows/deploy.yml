@@ -1,37 +1,40 @@
-﻿name: CI-CD to EC2 (SSH)
+﻿name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create deployment package
+        run: tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' .
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
-          target: ${{ secrets.EC2_APP_DIR }}
-          strip_components: 0
-          overwrite: true
+          source: "roboapp.tar.gz"
+          target: "/home/ec2-user/"
 
-      - name: Restart app service on EC2
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ${{ secrets.EC2_APP_DIR }}
+            cd /home/ec2-user
+            tar -xzf roboapp.tar.gz -C /var/www/roboapp --strip-components=1
+            cd /var/www/roboapp
+            python3 -m venv /opt/roboapp-venv
             source /opt/roboapp-venv/bin/activate
             pip install -r requirements.txt
-            sudo systemctl restart roboapp || true
+            sudo systemctl restart roboapp
