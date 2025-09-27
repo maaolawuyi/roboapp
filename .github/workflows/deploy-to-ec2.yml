@@ -13,7 +13,10 @@ jobs:
 
       - name: Create archive
         run: |
-        tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' . || true
+          set +e
+          tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' .
+          exit 0
+
 
 
       - name: Copy archive to EC2
