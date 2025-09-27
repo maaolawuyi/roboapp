@@ -1,56 +1,45 @@
-name: CI/CD → EC2 (SSH)
+name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Create archive
-        run: |
-          set +e
-          tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' .
-          exit 0
-
-
+        run: tar --warning=no-file-changed -czf roboapp.tar.gz --exclude='.git' --exclude='.venv' . || true
 
       - name: Copy archive to EC2
-        uses: appleboy/scp-action@v1
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
           source: "roboapp.tar.gz"
-          target: "/tmp"
+          target: "${{ secrets.EC2_APP_DIR }}/"
 
-      - name: Deploy on EC2 and restart service
-        uses: appleboy/ssh-action@v1
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
           script: |
-            set -e
-            APP_DIR="${{ secrets.EC2_APP_DIR }}"
-            VENV="/opt/roboapp-venv"
-            REMOTE_USER="${{ secrets.EC2_USER }}"
-
-            sudo mkdir -p "$APP_DIR"
-            sudo tar -xzf /tmp/roboapp.tar.gz -C "$APP_DIR" --strip-components=1
-            sudo chown -R $REMOTE_USER:$REMOTE_USER "$APP_DIR"
-
-            if [ -f "$APP_DIR/requirements.txt" ]; then
-              sudo $VENV/bin/python -m pip install --upgrade pip
-              sudo $VENV/bin/python -m pip install -r "$APP_DIR/requirements.txt"
+            cd ${{ secrets.EC2_APP_DIR }}
+            tar -xzf roboapp.tar.gz
+            rm roboapp.tar.gz
+            # Optional: install dependencies
+            if [ -f requirements.txt ]; then
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
             fi
-
-            sudo systemctl daemon-reload
-            sudo systemctl enable roboapp.service || true
-            sudo systemctl restart roboapp.service || sudo journalctl -u roboapp.service --no-pager -n 200
+            # Restart your app (adjust command as needed)
+            sudo systemctl restart roboapp || true
